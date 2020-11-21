@@ -1,8 +1,6 @@
-import { Request, Response } from "express";
+import { RequestHandler } from "../../utils/requestHandler";
 
-export const index = (_req: Request, res: Response) => {
-  res.send({
-    title: `Home - ${process.env.NODE_ENV}`
-  });
+export const index = (handler: RequestHandler) => {
+  handler.sendResponse(`Home - ${process.env.NODE_ENV}`)
 };
 
