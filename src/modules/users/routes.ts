@@ -3,5 +3,6 @@ import { handle } from "../../utils/requestHandler";
 import { createUser } from "./controller";
 
 export default (app: Express) => {
-  app.get('/users', handle(createUser))
+  app.post('/users', handle(createUser))
+  return app
 }
