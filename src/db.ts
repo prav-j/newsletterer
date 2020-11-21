@@ -1,6 +1,6 @@
 import { Sequelize as Sequelize } from "sequelize-typescript";
 
-import configLoader from "../config";
+import configLoader from "./config";
 import * as path from "path";
 import { Transaction } from "sequelize";
 
@@ -8,7 +8,7 @@ const config = configLoader();
 
 let sequelize: Sequelize;
 
-export function getSequelizeInstance(): Sequelize {
+export function getDBInstance(): Sequelize {
   if (!sequelize) {
     const {db: connectionUri} = config
     sequelize = new Sequelize(connectionUri, {
@@ -19,23 +19,23 @@ export function getSequelizeInstance(): Sequelize {
         idle: 10000
       }
     });
-    sequelize.addModels([path.join(__dirname, '../modules/**/*.model.*')])
+    sequelize.addModels([path.join(__dirname, 'modules/**/*.model.*')])
   }
   return sequelize;
 }
 
 export const withTransaction = <T>(callback: (t: Transaction) => Promise<T>): Promise<T> => {
-  return getSequelizeInstance().transaction(callback)
+  return getDBInstance().transaction(callback)
 }
 
 export async function initializeDB(): Promise<Sequelize> {
-  const sequelize = getSequelizeInstance();
+  const sequelize = getDBInstance();
   await sequelize.sync({alter: true});
   return sequelize
 }
 
 export async function resetDB(): Promise<Sequelize> {
-  const sequelize = getSequelizeInstance();
+  const sequelize = getDBInstance();
   if (process.env.NODE_ENV !== 'test') {
     console.error('This WILL wipe out all data. Aborting. You may run this only in test mode.')
     return sequelize

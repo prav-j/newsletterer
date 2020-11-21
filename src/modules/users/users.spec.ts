@@ -1,12 +1,12 @@
 import * as supertest from "supertest";
 import { app } from "../../app";
-import { resetDB } from "../../models/base";
+import { resetDB } from "../../db";
 
 const request = supertest(app)
 
 describe('Create user', () => {
-  beforeEach(async () => resetDB())
-  afterAll(async () => resetDB())
+  beforeEach(resetDB)
+  afterAll(resetDB)
 
   describe('Validation', () => {
     it('should fail without name', () => {
@@ -47,8 +47,8 @@ describe('Create user', () => {
 })
 
 describe('Get users', () => {
-  beforeEach(async () => resetDB())
-  afterAll(async () => resetDB())
+  beforeEach(resetDB)
+  afterAll(resetDB)
 
   beforeEach(async () => {
     await request.post('/users').send({name: 'name1', email: 'something1@somewhere.com'})

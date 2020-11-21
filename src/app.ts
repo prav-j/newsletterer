@@ -8,7 +8,7 @@ import { EventEmitter } from "events";
 import routes from "./modules/routes";
 import * as cors from "cors";
 import { config } from 'dotenv'
-import { initializeDB } from "./models/base";
+import { initializeDB } from "./db";
 
 const middlewares = (app: Express) => {
   app.set("emitter", new EventEmitter());

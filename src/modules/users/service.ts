@@ -1,5 +1,5 @@
 import User from "./User.model";
-import { withTransaction } from "../../models/base";
+import { withTransaction } from "../../db";
 
 export async function getUsers() {
   return (await User.findAll()).map(({id, name, email}) => ({id, name, email}));
