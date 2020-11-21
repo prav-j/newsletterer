@@ -2,6 +2,7 @@ import { Sequelize as Sequelize } from "sequelize-typescript";
 
 import configLoader from "../config";
 import * as path from "path";
+import { Transaction } from "sequelize";
 
 const config = configLoader();
 
@@ -21,6 +22,10 @@ export function getSequelizeInstance(): Sequelize {
     sequelize.addModels([path.join(__dirname, '../modules/**/*.model.*')])
   }
   return sequelize;
+}
+
+export const withTransaction = <T>(callback: (t: Transaction) => Promise<T>): Promise<T> => {
+  return getSequelizeInstance().transaction(callback)
 }
 
 export async function initializeDB(): Promise<Sequelize> {
