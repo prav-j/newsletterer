@@ -15,3 +15,8 @@ export const createUser = async (handler: RequestHandler) => {
     }
   }
 };
+
+export const getUsers = async (handler: RequestHandler) => {
+  handler.sendResponse(await service.getUsers())
+};
+

@@ -1,5 +1,9 @@
 import User from "./User.model";
-import { getSequelizeInstance } from "../../models/base";
+import { withTransaction } from "../../models/base";
+
+export async function getUsers() {
+  return (await User.findAll()).map(({id, name, email}) => ({id, name, email}));
+}
 
 interface CreateUserRequest {
   name: string
@@ -7,8 +11,7 @@ interface CreateUserRequest {
 }
 
 export const createUser = async ({name, email}: CreateUserRequest) => {
-  const sequelize = getSequelizeInstance()
-  return sequelize.transaction(async transaction => {
+  return withTransaction(async transaction => {
     return User.build({name, email})
       .save({transaction});
   })
