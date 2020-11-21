@@ -9,8 +9,7 @@ let sequelize: Sequelize;
 
 export function getInstance(): Sequelize {
   if (!sequelize) {
-    const {db} = config
-    const connectionUri = `postgres://${db.username}:${db.password}@${db.host}:${db.port}/${db.database}`
+    const {db: connectionUri} = config
     sequelize = new Sequelize(connectionUri, {
       logging: false,
       pool: {
