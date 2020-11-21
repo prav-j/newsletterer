@@ -1,7 +1,8 @@
-import * as home from "./home";
 import { Express } from "express";
-import { handle } from "../utils/requestHandler";
+import homeRoutes from './home/routes'
+import userRoutes from './users/routes'
 
 export default function (app: Express) {
-  app.get("/", handle(home.index));
+  homeRoutes(app)
+  userRoutes(app)
 }
