@@ -1,4 +1,4 @@
-import { Column, DataType, Model, PrimaryKey, Table, BeforeCreate } from "sequelize-typescript";
+import { BeforeCreate, Column, DataType, Model, PrimaryKey, Table, Unique } from "sequelize-typescript";
 import { v4 } from 'uuid'
 
 @Table({
@@ -10,12 +10,14 @@ export default class User extends Model<User> {
   @Column({type: DataType.UUID})
   id: ReturnType<typeof v4>;
 
+  @Unique
   @Column({
     type: DataType.STRING,
     allowNull: false
   })
   name: String;
 
+  @Unique
   @Column({
     type: DataType.STRING,
     allowNull: false
