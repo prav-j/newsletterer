@@ -8,6 +8,7 @@ import { EventEmitter } from "events";
 import routes from "./modules/routes";
 import * as cors from "cors";
 import { config } from 'dotenv'
+import { initialize } from "./models/base";
 
 const app = express();
 config()
@@ -34,13 +35,14 @@ initializeApplication()
   .catch(error => {
     console.log("Error occurred when initializing app.");
     console.log(error);
-    process.exit();
+    process.exit(1);
   });
 
 module.exports = app;
 
 async function initializeApplication() {
   routes(app);
+  await initialize()
   app.listen(app.get("port"), () => {
     app.get("emitter").emit("appStarted");
   });
