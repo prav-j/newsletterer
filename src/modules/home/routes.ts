@@ -4,4 +4,5 @@ import { home } from "./controller";
 
 export default function (app: Express) {
   app.get("/", handle(home));
+  return app
 }

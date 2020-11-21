@@ -7,7 +7,7 @@ const config = configLoader();
 
 let sequelize: Sequelize;
 
-export function getInstance(): Sequelize {
+export function getSequelizeInstance(): Sequelize {
   if (!sequelize) {
     const {db: connectionUri} = config
     sequelize = new Sequelize(connectionUri, {
@@ -23,8 +23,18 @@ export function getInstance(): Sequelize {
   return sequelize;
 }
 
-export async function initialize(): Promise<Sequelize> {
-  const sequelize = getInstance();
+export async function initializeDB(): Promise<Sequelize> {
+  const sequelize = getSequelizeInstance();
   await sequelize.sync({alter: true});
+  return sequelize
+}
+
+export async function resetDB(): Promise<Sequelize> {
+  const sequelize = getSequelizeInstance();
+  if (process.env.NODE_ENV !== 'test') {
+    console.error('This WILL wipe out all data. Aborting. You may run this only in test mode.')
+    return sequelize
+  }
+  await sequelize.sync({force: true});
   return sequelize
 }
