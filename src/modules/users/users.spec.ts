@@ -3,6 +3,7 @@ import { getApp } from "../../app";
 import { resetDB } from "../../db";
 import { UUID } from "../../types/UUID";
 import { DateTime } from "luxon";
+import { getUsersWithPendingNewsletter } from "./service";
 
 const request = supertest(getApp())
 
@@ -144,6 +145,9 @@ describe('Fetch users', () => {
     user = await request.post('/users')
       .send({name: 'name1', email: 'something1@somewhere.com'})
       .then(({body: {data: {id}}}) => id)
+    await request.post('/users')
+      .send({name: 'name2', email: 'something2@somewhere.com', schedule: {isEnabled: false}})
+      .then(({body: {data: {id}}}) => id)
   })
   it('should fetch user', async () => {
     await request.get(`/users/${user}`)
@@ -165,6 +169,11 @@ describe('Fetch users', () => {
 
   it('should return 404 for unknown user', async () => {
     await request.get('/users/404user').expect(404)
+  })
+
+  it('should get users who have a newsletter scheduled', async () => {
+    const users = await getUsersWithPendingNewsletter()
+    expect(users.length).toEqual(0)
   })
 })
 

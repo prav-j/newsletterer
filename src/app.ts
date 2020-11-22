@@ -9,6 +9,7 @@ import routes from "./modules/routes";
 import * as cors from "cors";
 import { config } from 'dotenv'
 import { initializeDB } from "./db";
+import newsletterScheduler from "./modules/newsletter/scheduler";
 
 const middlewares = (app: Express) => {
   app.set("emitter", new EventEmitter());
@@ -31,6 +32,7 @@ export const getApp = () => {
   config()
   middlewares(app)
   app.get("emitter").on("appStarted", function () {
+    newsletterScheduler()
     console.log(("App is running at http://localhost:%d in %s mode"), app.get("port"), app.get("env"));
     console.log("Press CTRL-C to stop\n");
   });

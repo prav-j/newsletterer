@@ -1,8 +1,9 @@
 import User from "./User.model";
 import { withTransaction } from "../../db";
 import { UUID } from "../../types/UUID";
-import { Transaction } from "sequelize";
+import { Op, Transaction } from "sequelize";
 import NewsletterSchedule from "../newsletter/NewsletterSchedule.model";
+import { DateTime } from "luxon";
 
 interface CreateOrUpdateUserRequest {
   name: string
@@ -52,7 +53,7 @@ export const createUser = async (request: CreateOrUpdateUserRequest) => {
   })
 }
 
-export async function updateUser(userId: string, request: CreateOrUpdateUserRequest) {
+export const updateUser = async (userId: string, request: CreateOrUpdateUserRequest) => {
   return withTransaction(async transaction => {
     const user = await fetchUser(userId, transaction)
     if (!user) {
@@ -61,5 +62,22 @@ export async function updateUser(userId: string, request: CreateOrUpdateUserRequ
     await user.update(extractUserData(request), {transaction});
     await (await user.$get('newsletterSchedule'))?.update(extractScheduleData(request), {transaction})
     return user
+  });
+};
+
+export const getUsersWithPendingNewsletter = async (): Promise<User[]> => {
+  const timeNow = DateTime.local().toSeconds()
+  return User.findAll({
+    include: [{
+      model: NewsletterSchedule,
+      where: {
+        isEnabled: {
+          [Op.eq]: true
+        },
+        nextScheduledAt: {
+          [Op.lte]: timeNow
+        }
+      }
+    }],
   })
 }

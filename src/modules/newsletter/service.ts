@@ -6,6 +6,9 @@ import * as emailAPI from "../../api/emailService"
 import NewsletterSchedule from "./NewsletterSchedule.model";
 
 const createNewsletterForUser = async (user: User) => {
+  if (user.subreddits.length === 0) {
+    return null
+  }
   const states = await Promise.all(user.subreddits.map(subreddit => getTopPostsInLastDay(subreddit)))
   return {
     user: user.name,
@@ -26,7 +29,11 @@ export const emailNewsletterForUser = async (userId: UUID): Promise<Newsletter |
   if (!user || !user.newsletterSchedule.isEnabled) {
     return
   }
+  await user.newsletterSchedule.markSentAndScheduleNext()
   const newsletter = await createNewsletterForUser(user)
+  if (!newsletter) {
+    return
+  }
   await emailAPI.emailNewsletter(newsletter)
   return newsletter
 }
