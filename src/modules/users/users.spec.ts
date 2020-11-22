@@ -40,10 +40,40 @@ describe('Create user', () => {
     })
   })
 
-  it('should create valid user', () => {
+  it('should create valid user with default values', () => {
     return request.post('/users')
       .send({name: 'name', email: 'something@somewhere.com'})
       .expect(201)
+      .then(res => {
+        expect(res.body.data).toEqual(expect.objectContaining({
+          name: 'name',
+          email: 'something@somewhere.com',
+          isNewsletterEnabled: true,
+          newsletterSendTime: "08:00:00",
+          timezone: "UTC"
+        }));
+      })
+  })
+
+  it('should create valid user with specified values', () => {
+    return request.post('/users')
+      .send({
+        name: 'name',
+        email: 'something@somewhere.com',
+        isNewsletterEnabled: false,
+        newsletterSendTime: "09:00:00",
+        timezone: "Europe/Berlin"
+      })
+      .expect(201)
+      .then(res => {
+        expect(res.body.data).toEqual(expect.objectContaining({
+          name: 'name',
+          email: 'something@somewhere.com',
+          isNewsletterEnabled: false,
+          newsletterSendTime: "09:00:00",
+          timezone: "Europe/Berlin"
+        }));
+      })
   })
 })
 
@@ -89,7 +119,10 @@ describe('Fetch users', () => {
         data: {
           id: user,
           name: 'name1',
-          email: 'something1@somewhere.com'
+          email: 'something1@somewhere.com',
+          isNewsletterEnabled: true,
+          newsletterSendTime: '08:00:00',
+          timezone: 'UTC'
         }
       })
   })
@@ -116,15 +149,19 @@ describe('Update user', () => {
   it('should allow user to change their name and email', async () => {
     await request.put(`/users/${user1}`)
       .send({name: 'name1new', email: 'something1new@somewhere.com'})
-      .expect(200)
-    await request.get(`/users/${user1}`)
       .expect(200, {
         data: {
-          id: user1,
           name: 'name1new',
           email: 'something1new@somewhere.com'
         }
       })
+    await request.get(`/users/${user1}`)
+      .expect(200)
+      .then(response => expect(response.body.data).toEqual(expect.objectContaining({
+        id: user1,
+        name: 'name1new',
+        email: 'something1new@somewhere.com'
+      })))
   })
 
   it('should not allow name to collide with another user', async () => {

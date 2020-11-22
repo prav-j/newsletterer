@@ -1,4 +1,14 @@
-import { BeforeCreate, BelongsToMany, Column, DataType, Model, PrimaryKey, Table, Unique } from "sequelize-typescript";
+import {
+  BeforeCreate,
+  BelongsToMany,
+  Column,
+  DataType,
+  Default,
+  Model,
+  PrimaryKey,
+  Table,
+  Unique
+} from "sequelize-typescript";
 import { v4 } from 'uuid'
 import { UUID } from "../../types/UUID";
 import Subreddit from "../subreddit/Subreddit.model";
@@ -27,6 +37,18 @@ export default class User extends Model<User> {
   })
   email: String;
 
+  @Default(true)
+  @Column
+  isNewsletterEnabled: boolean
+
+  @Default("08:00:00")
+  @Column({type: DataType.TIME})
+  newsletterSendTime: string
+
+  @Default("UTC")
+  @Column
+  timezone: string
+
   @BeforeCreate({name: 'generateUUID'})
   static generateUUID(user: User) {
     user.id = v4()
@@ -35,7 +57,19 @@ export default class User extends Model<User> {
   @BelongsToMany(() => Subreddit, () => UserSubreddit)
   subreddits: Subreddit[]
 
-  format() {
-    return {id: this.id, name: this.name, email: this.email};
+  format(keys?: (keyof User)[]) {
+    const defaultKeys: (keyof User)[] = [
+      'id',
+      'name',
+      'email',
+      'isNewsletterEnabled',
+      'newsletterSendTime',
+      'timezone',
+    ]
+    const outputKeys = keys || defaultKeys
+    return outputKeys.reduce((acc, curr: keyof User) => {
+      acc[curr] = this[curr]
+      return acc
+    }, {} as Record<keyof User, unknown>)
   }
 }

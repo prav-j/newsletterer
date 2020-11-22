@@ -1,6 +1,7 @@
 import { RequestHandler } from "../../utils/requestHandler";
 import * as service from './service'
 import { ValidationError } from 'sequelize'
+import User from "./User.model";
 
 export const createUser = async (handler: RequestHandler) => {
   const body = handler.getBody()
@@ -32,13 +33,14 @@ export const fetchUser = async (handler: RequestHandler) => {
 
 export const updateUser = async (handler: RequestHandler) => {
   const userId = handler.getRouteParameters().userId
+  const updateRequest = handler.getBody();
   try {
-    const user = await service.updateUser(userId, handler.getBody());
+    const user = await service.updateUser(userId, updateRequest);
     if (!user) {
       handler.sendNotFoundResponse()
       return
     }
-    handler.sendResponse(user.format())
+    handler.sendResponse(user.format(Object.keys(updateRequest) as (keyof User)[]))
   } catch (error) {
     if (error instanceof ValidationError) {
       handler.sendValidationError(error.errors[0])

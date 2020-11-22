@@ -6,6 +6,9 @@ import { Transaction } from "sequelize";
 interface CreateOrUpdateUserRequest {
   name: string
   email: string
+  isNewsletterEnabled: boolean | undefined,
+  newsletterSendTime: string | undefined,
+  timezone: string | undefined
 }
 
 export async function getUsers() {
@@ -16,8 +19,14 @@ export async function fetchUser(userId: UUID, transaction?: Transaction) {
   return User.findOne({where: {id: userId}, transaction});
 }
 
-export const createUser = async ({name, email}: CreateOrUpdateUserRequest) => {
-  return User.create({name, email})
+export const createUser = async (request: CreateOrUpdateUserRequest) => {
+  return User.create({
+    name: request.name,
+    email: request.email,
+    isNewsletterEnabled: request.isNewsletterEnabled,
+    newsletterSendTime: request.newsletterSendTime,
+    timezone: request.timezone,
+  })
 }
 
 export async function updateUser(userId: string, {name, email}: CreateOrUpdateUserRequest) {
