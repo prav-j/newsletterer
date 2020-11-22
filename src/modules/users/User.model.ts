@@ -2,7 +2,7 @@ import { BeforeCreate, Column, DataType, Model, PrimaryKey, Table, Unique } from
 import { v4 } from 'uuid'
 
 @Table({
-  tableName: "user",
+  tableName: "users",
   updatedAt: false
 })
 export default class User extends Model<User> {
@@ -10,14 +10,14 @@ export default class User extends Model<User> {
   @Column({type: DataType.UUID})
   id: ReturnType<typeof v4>;
 
-  @Unique
+  @Unique({name: 'user.name', msg: 'User name has to be unique'})
   @Column({
     type: DataType.STRING,
     allowNull: false
   })
   name: String;
 
-  @Unique
+  @Unique({name: 'user.email', msg: 'User email has to be unique'})
   @Column({
     type: DataType.STRING,
     allowNull: false
