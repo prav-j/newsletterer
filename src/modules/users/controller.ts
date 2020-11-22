@@ -7,7 +7,7 @@ export const createUser = async (handler: RequestHandler) => {
   const body = handler.getBody()
   try {
     const user = await service.createUser(body || {})
-    handler.sendCreatedResponse(user)
+    handler.sendCreatedResponse({...user.format(), nextScheduledNewsletter: await user.getNextScheduledNewsletter()})
   } catch (error) {
     if (error instanceof ValidationError) {
       handler.sendValidationError(error.errors[0])

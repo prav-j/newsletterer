@@ -4,6 +4,7 @@ import {
   Column,
   DataType,
   Default,
+  HasOne,
   Model,
   PrimaryKey,
   Table,
@@ -13,6 +14,7 @@ import { v4 } from 'uuid'
 import { UUID } from "../../types/UUID";
 import Subreddit from "../subreddit/Subreddit.model";
 import UserSubreddit from "./UserSubreddit.model";
+import NewsletterSchedule from "../newsletter/ScheduledNewsletter.model";
 
 @Table({
   tableName: "users",
@@ -57,6 +59,13 @@ export default class User extends Model<User> {
   @BelongsToMany(() => Subreddit, () => UserSubreddit)
   subreddits: Subreddit[]
 
+  @HasOne(() => NewsletterSchedule)
+  newsletterSchedule: NewsletterSchedule
+
+  async getNextScheduledNewsletter() {
+    return (await this.$get('newsletterSchedule'))?.nextScheduledAt
+  }
+
   format(keys?: (keyof User)[]) {
     const defaultKeys: (keyof User)[] = [
       'id',
@@ -64,7 +73,7 @@ export default class User extends Model<User> {
       'email',
       'isNewsletterEnabled',
       'newsletterSendTime',
-      'timezone',
+      'timezone'
     ]
     const outputKeys = keys || defaultKeys
     return outputKeys.reduce((acc, curr: keyof User) => {

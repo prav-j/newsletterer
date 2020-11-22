@@ -2,6 +2,7 @@ import * as supertest from "supertest";
 import { getApp } from "../../app";
 import { resetDB } from "../../db";
 import { UUID } from "../../types/UUID";
+import { DateTime } from "luxon";
 
 const request = supertest(getApp())
 
@@ -71,8 +72,28 @@ describe('Create user', () => {
           email: 'something@somewhere.com',
           isNewsletterEnabled: false,
           newsletterSendTime: "09:00:00",
-          timezone: "Europe/Berlin"
+          timezone: "Europe/Berlin",
+          nextScheduledNewsletter: null
         }));
+      })
+  })
+
+  it('should schedule a newsletter on user creation', async () => {
+    const timezone = 'Europe/Berlin'
+    const now = DateTime.local().setZone(timezone)
+    const nextTimestampISO = `${DateTime.local().plus({hours: now.hour < 10 ? 0 : 24}).toFormat("yyyy-MM-dd")}T10:00:00`
+    const nextTime = DateTime.fromISO(nextTimestampISO, {zone: timezone})
+    await request.post('/users')
+      .send({
+        name: 'name',
+        email: 'something@somewhere.com',
+        newsletterSendTime: '10:00:00',
+        timezone: 'Europe/Berlin'
+      })
+      .then(response => {
+        expect(response.body.data).toEqual(expect.objectContaining({
+          nextScheduledNewsletter: nextTime.toSeconds()
+        }))
       })
   })
 })
