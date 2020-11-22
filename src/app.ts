@@ -26,15 +26,19 @@ const middlewares = (app: Express) => {
   return routes(app);
 }
 
-export const app = express();
-config()
-middlewares(app)
-app.get("emitter").on("appStarted", function () {
-  console.log(("App is running at http://localhost:%d in %s mode"), app.get("port"), app.get("env"));
-  console.log("Press CTRL-C to stop\n");
-});
+export const getApp = () => {
+  const app = express();
+  config()
+  middlewares(app)
+  app.get("emitter").on("appStarted", function () {
+    console.log(("App is running at http://localhost:%d in %s mode"), app.get("port"), app.get("env"));
+    console.log("Press CTRL-C to stop\n");
+  });
+  return app
+}
 
 export default async () => {
+  const app = getApp()
   await initializeDB()
   return app;
 }

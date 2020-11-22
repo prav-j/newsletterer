@@ -1,8 +1,8 @@
 import * as supertest from "supertest";
-import { app } from "../../app";
+import { getApp } from "../../app";
 import { resetDB } from "../../db";
 
-const request = supertest(app)
+const request = supertest(getApp())
 
 describe("Home Page", () => {
   beforeEach(resetDB)
