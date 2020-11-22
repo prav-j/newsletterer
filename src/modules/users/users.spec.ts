@@ -164,6 +164,26 @@ describe('Update user', () => {
       })))
   })
 
+  it('should allow user to toggle the newsletter sendout', async () => {
+    await request.put(`/users/${user1}`)
+      .send({isNewsletterEnabled: false})
+      .expect(200, {
+        data: {
+          isNewsletterEnabled: false
+        }
+      })
+  })
+
+  it('should allow user to change the newsletter sendout time', async () => {
+    await request.put(`/users/${user1}`)
+      .send({newsletterSendTime: "10:00:00"})
+      .expect(200, {
+        data: {
+          newsletterSendTime: "10:00:00"
+        }
+      })
+  })
+
   it('should not allow name to collide with another user', async () => {
     await request.put(`/users/${user1}`)
       .send({name: 'name2'})

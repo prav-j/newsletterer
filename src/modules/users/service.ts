@@ -19,22 +19,26 @@ export async function fetchUser(userId: UUID, transaction?: Transaction) {
   return User.findOne({where: {id: userId}, transaction});
 }
 
-export const createUser = async (request: CreateOrUpdateUserRequest) => {
-  return User.create({
+const extractFromRequest = (request: CreateOrUpdateUserRequest): Partial<User> => {
+  return {
     name: request.name,
     email: request.email,
     isNewsletterEnabled: request.isNewsletterEnabled,
     newsletterSendTime: request.newsletterSendTime,
     timezone: request.timezone,
-  })
+  }
 }
 
-export async function updateUser(userId: string, {name, email}: CreateOrUpdateUserRequest) {
+export const createUser = async (request: CreateOrUpdateUserRequest) => {
+  return User.create(extractFromRequest(request))
+}
+
+export async function updateUser(userId: string, request: CreateOrUpdateUserRequest) {
   return withTransaction(async transaction => {
     const user = await fetchUser(userId, transaction)
     if (!user) {
       return null
     }
-    return user.update({name, email}, {transaction});
+    return user.update(extractFromRequest(request), {transaction});
   })
 }
