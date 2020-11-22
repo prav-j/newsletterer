@@ -2,7 +2,7 @@ import User from "./User.model";
 import { withTransaction } from "../../db";
 import { UUID } from "../../types/UUID";
 import { Transaction } from "sequelize";
-import NewsletterSchedule from "../newsletter/ScheduledNewsletter.model";
+import NewsletterSchedule from "../newsletter/NewsletterSchedule.model";
 
 interface CreateOrUpdateUserRequest {
   name: string

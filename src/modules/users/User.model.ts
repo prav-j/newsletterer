@@ -13,7 +13,7 @@ import { v4 } from 'uuid'
 import { UUID } from "../../types/UUID";
 import Subreddit from "../subreddit/Subreddit.model";
 import UserSubreddit from "./UserSubreddit.model";
-import NewsletterSchedule from "../newsletter/ScheduledNewsletter.model";
+import NewsletterSchedule from "../newsletter/NewsletterSchedule.model";
 
 @Table({
   tableName: "users",

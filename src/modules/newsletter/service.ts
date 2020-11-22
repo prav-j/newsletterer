@@ -3,7 +3,7 @@ import { getTopPostsInLastDay } from "../posts/service";
 import { UUID } from "../../types/UUID";
 import Subreddit from "../subreddit/Subreddit.model";
 import * as emailAPI from "../../api/emailService"
-import NewsletterSchedule from "./ScheduledNewsletter.model";
+import NewsletterSchedule from "./NewsletterSchedule.model";
 
 const createNewsletterForUser = async (user: User) => {
   const states = await Promise.all(user.subreddits.map(subreddit => getTopPostsInLastDay(subreddit)))

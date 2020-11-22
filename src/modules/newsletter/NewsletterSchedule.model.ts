@@ -14,7 +14,7 @@ import { Transaction } from "sequelize";
 import { DateTime } from "luxon";
 
 @Table({
-  tableName: 'scheduled_newsletters',
+  tableName: 'newsletter_schedules',
   createdAt: false,
   updatedAt: false
 })
