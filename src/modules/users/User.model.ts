@@ -3,7 +3,6 @@ import {
   BelongsToMany,
   Column,
   DataType,
-  Default,
   HasOne,
   Model,
   PrimaryKey,
@@ -39,18 +38,6 @@ export default class User extends Model<User> {
   })
   email: String;
 
-  @Default(true)
-  @Column
-  isNewsletterEnabled: boolean
-
-  @Default("08:00:00")
-  @Column({type: DataType.TIME})
-  newsletterSendTime: string
-
-  @Default("UTC")
-  @Column
-  timezone: string
-
   @BeforeCreate({name: 'generateUUID'})
   static generateUUID(user: User) {
     user.id = v4()
@@ -62,23 +49,12 @@ export default class User extends Model<User> {
   @HasOne(() => NewsletterSchedule)
   newsletterSchedule: NewsletterSchedule
 
-  async getNextScheduledNewsletter() {
-    return (await this.$get('newsletterSchedule'))?.nextScheduledAt
-  }
-
-  format(keys?: (keyof User)[]) {
-    const defaultKeys: (keyof User)[] = [
-      'id',
-      'name',
-      'email',
-      'isNewsletterEnabled',
-      'newsletterSendTime',
-      'timezone'
-    ]
-    const outputKeys = keys || defaultKeys
-    return outputKeys.reduce((acc, curr: keyof User) => {
-      acc[curr] = this[curr]
-      return acc
-    }, {} as Record<keyof User, unknown>)
+  async format() {
+    return {
+      id: this.id,
+      name: this.name,
+      email: this.email,
+      schedule: (await this.$get('newsletterSchedule'))?.format()
+    }
   }
 }

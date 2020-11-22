@@ -7,9 +7,11 @@ import NewsletterSchedule from "../newsletter/ScheduledNewsletter.model";
 interface CreateOrUpdateUserRequest {
   name: string
   email: string
-  isNewsletterEnabled: boolean | undefined,
-  newsletterSendTime: string | undefined,
-  timezone: string | undefined
+  schedule: {
+    isEnabled: boolean | undefined,
+    newsletterSendTime: string | undefined,
+    timezone: string | undefined
+  }
 }
 
 export async function getUsers() {
@@ -20,21 +22,29 @@ export async function fetchUser(userId: UUID, transaction?: Transaction) {
   return User.findOne({where: {id: userId}, transaction});
 }
 
-const extractFromRequest = (request: CreateOrUpdateUserRequest): Partial<User> => {
+const extractUserData = (request: CreateOrUpdateUserRequest): Partial<User> => {
   return {
     name: request.name,
     email: request.email,
-    isNewsletterEnabled: request.isNewsletterEnabled,
-    newsletterSendTime: request.newsletterSendTime,
-    timezone: request.timezone,
+  }
+}
+
+const extractScheduleData = (request: CreateOrUpdateUserRequest): Partial<NewsletterSchedule> => {
+  return {
+    isEnabled: request.schedule?.isEnabled,
+    newsletterSendTime: request.schedule?.newsletterSendTime,
+    timezone: request.schedule?.timezone,
   }
 }
 
 export const createUser = async (request: CreateOrUpdateUserRequest) => {
   return await withTransaction(async transaction => {
-    const user = await User.create(extractFromRequest(request), {transaction})
-    const newsletterSchedule = await NewsletterSchedule.create({userId: user.id}, {transaction})
-    if (request.isNewsletterEnabled === false) {
+    const user = await User.create(extractUserData(request), {transaction})
+    const newsletterSchedule = await NewsletterSchedule.create({
+      userId: user.id,
+      ...extractScheduleData(request)
+    }, {transaction})
+    if (request.schedule?.isEnabled === false) {
       await newsletterSchedule.cancelScheduled(transaction)
     }
     user.$set('newsletterSchedule', newsletterSchedule)
@@ -48,6 +58,8 @@ export async function updateUser(userId: string, request: CreateOrUpdateUserRequ
     if (!user) {
       return null
     }
-    return user.update(extractFromRequest(request), {transaction});
+    await user.update(extractUserData(request), {transaction});
+    await (await user.$get('newsletterSchedule'))?.update(extractScheduleData(request), {transaction})
+    return user
   })
 }

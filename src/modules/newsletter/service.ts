@@ -3,10 +3,10 @@ import { getTopPostsInLastDay } from "../posts/service";
 import { UUID } from "../../types/UUID";
 import Subreddit from "../subreddit/Subreddit.model";
 import * as emailAPI from "../../api/emailService"
+import NewsletterSchedule from "./ScheduledNewsletter.model";
 
 const createNewsletterForUser = async (user: User) => {
-  const subreddits = await user.$get('subreddits')
-  const states = await Promise.all(subreddits.map(subreddit => getTopPostsInLastDay(subreddit)))
+  const states = await Promise.all(user.subreddits.map(subreddit => getTopPostsInLastDay(subreddit)))
   return {
     user: user.name,
     email: user.email,
@@ -22,8 +22,8 @@ const createNewsletterForUser = async (user: User) => {
 }
 
 export const emailNewsletterForUser = async (userId: UUID): Promise<Newsletter | undefined> => {
-  const user = await User.findOne({where: {id: userId}})
-  if (!user || !user.isNewsletterEnabled) {
+  const user = await User.findOne({where: {id: userId}, include: [NewsletterSchedule, Subreddit]})
+  if (!user || !user.newsletterSchedule.isEnabled) {
     return
   }
   const newsletter = await createNewsletterForUser(user)

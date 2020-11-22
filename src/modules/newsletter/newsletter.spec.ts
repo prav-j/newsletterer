@@ -58,7 +58,7 @@ describe('Newsletter creation', () => {
   })
 
   it('should not create newsletter if user has disabled it', async () => {
-    await request.put(`/users/${user}`).send({isNewsletterEnabled: false})
+    await request.put(`/users/${user}`).send({schedule: {isEnabled: false}})
     const newsletter = await emailNewsletterForUser(user)
     expect(emailAPI.emailNewsletter).not.toBeCalled()
     expect(newsletter).toEqual(undefined)

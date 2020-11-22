@@ -49,9 +49,11 @@ describe('Create user', () => {
         expect(res.body.data).toEqual(expect.objectContaining({
           name: 'name',
           email: 'something@somewhere.com',
-          isNewsletterEnabled: true,
-          newsletterSendTime: "08:00:00",
-          timezone: "UTC"
+          schedule: expect.objectContaining({
+            isEnabled: true,
+            newsletterSendTime: "08:00:00",
+            timezone: "UTC"
+          })
         }));
       })
   })
@@ -61,19 +63,23 @@ describe('Create user', () => {
       .send({
         name: 'name',
         email: 'something@somewhere.com',
-        isNewsletterEnabled: false,
-        newsletterSendTime: "09:00:00",
-        timezone: "Europe/Berlin"
+        schedule: {
+          isEnabled: false,
+          newsletterSendTime: "09:00:00",
+          timezone: "Europe/Berlin"
+        }
       })
       .expect(201)
       .then(res => {
         expect(res.body.data).toEqual(expect.objectContaining({
           name: 'name',
           email: 'something@somewhere.com',
-          isNewsletterEnabled: false,
-          newsletterSendTime: "09:00:00",
-          timezone: "Europe/Berlin",
-          nextScheduledNewsletter: null
+          schedule: expect.objectContaining({
+            isEnabled: false,
+            newsletterSendTime: "09:00:00",
+            timezone: "Europe/Berlin",
+            nextScheduledAt: null
+          })
         }));
       })
   })
@@ -87,12 +93,17 @@ describe('Create user', () => {
       .send({
         name: 'name',
         email: 'something@somewhere.com',
-        newsletterSendTime: '10:00:00',
-        timezone: 'Europe/Berlin'
+        schedule: {
+          newsletterSendTime: '10:00:00',
+          timezone: 'Europe/Berlin'
+        }
       })
       .then(response => {
         expect(response.body.data).toEqual(expect.objectContaining({
-          nextScheduledNewsletter: nextTime.toSeconds()
+          schedule: expect.objectContaining({
+            isEnabled: true,
+            nextScheduledAt: nextTime.toSeconds()
+          })
         }))
       })
   })
@@ -136,16 +147,20 @@ describe('Fetch users', () => {
   })
   it('should fetch user', async () => {
     await request.get(`/users/${user}`)
-      .expect(200, {
-        data: {
+      .expect(200)
+      .then(response =>
+        expect(response.body.data).toEqual({
           id: user,
           name: 'name1',
           email: 'something1@somewhere.com',
-          isNewsletterEnabled: true,
-          newsletterSendTime: '08:00:00',
-          timezone: 'UTC'
-        }
-      })
+          schedule: expect.objectContaining({
+            isEnabled: true,
+            nextScheduledAt: expect.any(Number),
+            newsletterSendTime: '08:00:00',
+            timezone: 'UTC'
+          })
+        })
+      )
   })
 
   it('should return 404 for unknown user', async () => {
@@ -170,38 +185,33 @@ describe('Update user', () => {
   it('should allow user to change their name and email', async () => {
     await request.put(`/users/${user1}`)
       .send({name: 'name1new', email: 'something1new@somewhere.com'})
-      .expect(200, {
-        data: {
-          name: 'name1new',
-          email: 'something1new@somewhere.com'
-        }
-      })
-    await request.get(`/users/${user1}`)
       .expect(200)
-      .then(response => expect(response.body.data).toEqual(expect.objectContaining({
+      .then(response => expect(response.body.data).toMatchObject({
         id: user1,
         name: 'name1new',
         email: 'something1new@somewhere.com'
-      })))
+      }))
   })
 
   it('should allow user to toggle the newsletter sendout', async () => {
     await request.put(`/users/${user1}`)
-      .send({isNewsletterEnabled: false})
-      .expect(200, {
-        data: {
-          isNewsletterEnabled: false
-        }
+      .send({
+        schedule: {isEnabled: false}
+      })
+      .expect(200)
+      .then(response => {
+        expect(response.body.data.schedule.isEnabled).toEqual(false)
       })
   })
 
   it('should allow user to change the newsletter sendout time', async () => {
     await request.put(`/users/${user1}`)
-      .send({newsletterSendTime: "10:00:00"})
-      .expect(200, {
-        data: {
-          newsletterSendTime: "10:00:00"
-        }
+      .send({
+        schedule: {newsletterSendTime: "10:00:00"}
+      })
+      .expect(200)
+      .then(response => {
+        expect(response.body.data.schedule.newsletterSendTime).toEqual("10:00:00")
       })
   })
 
