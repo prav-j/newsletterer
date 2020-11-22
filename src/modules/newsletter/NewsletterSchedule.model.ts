@@ -37,9 +37,6 @@ export default class NewsletterSchedule extends Model<NewsletterSchedule> {
   timezone: string
 
   @Column
-  lastSentAt?: number
-
-  @Column
   nextScheduledAt?: number
 
   @BelongsTo(() => User)
@@ -50,13 +47,15 @@ export default class NewsletterSchedule extends Model<NewsletterSchedule> {
     if (!schedule.isEnabled) {
       return
     }
-    schedule.lastSentAt = DateTime.local().toSeconds()
     schedule.nextScheduledAt = computeNextNewsletterTime(schedule.newsletterSendTime, schedule.timezone)
+    return schedule
   }
 
   async markSentAndScheduleNext(transaction?: Transaction) {
+    if (!this.isEnabled) {
+      return
+    }
     await this.update({
-      lastSentAt: DateTime.local().toSeconds(),
       nextScheduledAt: computeNextNewsletterTime(this.newsletterSendTime, this.timezone)
     }, {transaction})
   }
