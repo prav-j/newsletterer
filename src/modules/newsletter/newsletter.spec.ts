@@ -52,4 +52,10 @@ describe('Newsletter creation', () => {
       ]),
     }))
   })
+
+  it('should not create newsletter if user has disabled it', async () => {
+    await request.put(`/users/${user}`).send({isNewsletterEnabled: false})
+    const newsletter = await emailNewsletterForUser(user)
+    expect(newsletter).toEqual(undefined)
+  })
 })

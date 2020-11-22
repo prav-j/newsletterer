@@ -21,7 +21,7 @@ const createNewsletterForUser = async (user: User) => {
 
 export const emailNewsletterForUser = async (userId: UUID) => {
   const user = await User.findOne({where: {id: userId}})
-  if (!user) {
+  if (!user || !user.isNewsletterEnabled) {
     return
   }
   const newsletter = await createNewsletterForUser(user)
