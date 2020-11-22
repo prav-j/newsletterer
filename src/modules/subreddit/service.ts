@@ -20,6 +20,14 @@ export const subscribeUserToSubreddit = async (userId: UUID, subreddit: Subreddi
   await subreddit.$add('user', user)
 };
 
+export const unsubscribeUserFromSubreddit = async (userId: UUID, subreddit: Subreddit) => {
+  const user = await userService.fetchUser(userId)
+  if (!user) {
+    throw new ValidationError('User does not exist!')
+  }
+  await subreddit.$remove('user', user)
+};
+
 export const createOrFetchSubreddit = async (name: string) => {
   return withTransaction(async transaction => {
     const subreddit = await fetchSubreddit(name, transaction)

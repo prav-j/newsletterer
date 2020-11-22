@@ -37,3 +37,23 @@ export const subscribeToSubreddit = async (handler: RequestHandler) => {
     }
   }
 };
+
+export const unsubscribeFromSubreddit = async (handler: RequestHandler) => {
+  const {name: subredditName} = handler.getRouteParameters()
+  try {
+    const userId = handler.getBody().user
+    const subreddit = await service.fetchSubreddit(subredditName)
+    if (!subreddit) {
+      handler.sendNotFoundResponse()
+      return
+    }
+    await service.unsubscribeUserFromSubreddit(userId, subreddit)
+    handler.sendResponse(null)
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      handler.sendValidationError(error.errors[0] || error.message)
+    } else {
+      handler.sendServerError(error)
+    }
+  }
+};

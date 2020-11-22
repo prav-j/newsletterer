@@ -40,7 +40,7 @@ describe("Subreddit", () => {
         .then(response => response.body.data.id);
     })
 
-    it('should throw error on unknown user', async () => {
+    it('should throw error on unknown user subscribing', async () => {
       const subredditName = 'someSubreddit';
       await request.post(`/subreddits/${subredditName}/subscribe`)
         .send({user: v4()})
@@ -67,6 +67,40 @@ describe("Subreddit", () => {
         .expect(200)
       await request.get(`/subreddits/${subredditName}`)
         .expect(200, {data: {name: subredditName, userCount: 1}})
+    })
+  })
+
+  describe('Unsubscription', () => {
+    const subreddit = 'something201'
+    let userId: UUID
+    beforeEach(async () => {
+      userId = await request.post('/users')
+        .send({name: 'test user', email: 'user@test.com'})
+        .then(response => response.body.data.id);
+      await request.post(`/subreddits/${subreddit}`)
+      await request.post(`/subreddits/${subreddit}/subscribe`).send({user: userId})
+    })
+
+    it('should throw error on unknown user unsubscribing', async () => {
+      await request.post(`/subreddits/${subreddit}/unsubscribe`)
+        .send({user: v4()})
+        .expect(400)
+    })
+
+    it('should unsubscribe user from subreddit', async () => {
+      await request.get(`/subreddits/${subreddit}`)
+        .expect(200, {data: {name: subreddit, userCount: 1}})
+      await request.post(`/subreddits/${subreddit}/unsubscribe`)
+        .send({user: userId})
+        .expect(200)
+      await request.get(`/subreddits/${subreddit}`)
+        .expect(200, {data: {name: subreddit, userCount: 0}})
+    })
+
+    it('should fail if subreddit does not exist', async () => {
+      await request.post(`/subreddits/something404/unsubscribe`)
+        .send({user: userId})
+        .expect(404)
     })
   })
 })
