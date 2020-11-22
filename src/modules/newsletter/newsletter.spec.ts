@@ -2,9 +2,11 @@ import { resetDB } from "../../db";
 import { emailNewsletterForUser } from "./service";
 import { getApp } from "../../app";
 import { UUID } from "../../types/UUID";
-import supertest = require("supertest");
+import * as supertest from "supertest";
+import * as emailAPI from '../../api/emailService'
 
 jest.mock('node-fetch')
+jest.mock('../../api/emailService')
 
 const request = supertest(getApp())
 
@@ -14,6 +16,7 @@ describe('Newsletter creation', () => {
 
   let user: UUID
   beforeEach(async () => {
+    jest.resetAllMocks()
     user = await request
       .post('/users')
       .send({
@@ -42,6 +45,7 @@ describe('Newsletter creation', () => {
       })
     }
     const newsletter = await emailNewsletterForUser(user)
+    expect(emailAPI.emailNewsletter).toBeCalledWith(newsletter)
     expect(newsletter).toEqual(expect.objectContaining({
       user: 'test',
       email: 'test@some.com',
@@ -56,6 +60,7 @@ describe('Newsletter creation', () => {
   it('should not create newsletter if user has disabled it', async () => {
     await request.put(`/users/${user}`).send({isNewsletterEnabled: false})
     const newsletter = await emailNewsletterForUser(user)
+    expect(emailAPI.emailNewsletter).not.toBeCalled()
     expect(newsletter).toEqual(undefined)
   })
 })
