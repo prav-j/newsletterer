@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Fetch posts should fetch top posts 1`] = `
+Object {
+  "link": "https://www.reddit.com/r/test",
+  "logo": "https://b.thumbs.redditmedia.com/slwYpQeWMVyRwpV_cgthYvlk4f2QU2SD5N_Id-dlWmA.png",
+  "posts": Array [
+    Object {
+      "link": "https://www.reddit.com/r/factorio/comments/jyu4yc/til_to_not_store_grenades_in_chests/",
+      "thumbnail": "https://b.thumbs.redditmedia.com/e17giyxleTTFcNJPEZTcf374mNuh-sYmN86ceBwbcDk.jpg",
+      "title": "TIL to not store grenades in chests",
+    },
+    Object {
+      "link": "https://www.reddit.com/r/factorio/comments/jyi8yg/nopipe_november/",
+      "thumbnail": undefined,
+      "title": "Nopipe November",
+    },
+    Object {
+      "link": "https://www.reddit.com/r/factorio/comments/jyhoyd/i_can_see_my_factory_breathe_on_the_edge_of_my/",
+      "thumbnail": "https://a.thumbs.redditmedia.com/N-1edZc7dJKUVPGRV9iH2-81OLkx7PBlnX_xav207m8.jpg",
+      "title": "I can see my factory breathe on the edge of my pollution cloud. Soon it will gain consciousness.",
+    },
+  ],
+  "subtitle": "Subreddit for the game Factorio made by Wube Software.",
+  "title": "top scoring links : factorio",
+}
+`;

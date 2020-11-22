@@ -21,4 +21,8 @@ export default class Subreddit extends Model<Subreddit> {
       userCount: await this.$count('users')
     }
   }
+
+  get url() {
+    return "https://www.reddit.com/r/" + this.name
+  }
 }
