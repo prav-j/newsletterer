@@ -20,3 +20,12 @@ export const getUsers = async (handler: RequestHandler) => {
   handler.sendResponse(await service.getUsers())
 };
 
+export const fetchUser = async (handler: RequestHandler) => {
+  const userId = handler.getRouteParameters().userId
+  let user = await service.fetchUser(userId);
+  if (user) {
+    handler.sendResponse(user.format())
+  } else {
+    handler.sendNotFoundResponse()
+  }
+}

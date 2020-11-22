@@ -1,6 +1,7 @@
 import * as supertest from "supertest";
 import { getApp } from "../../app";
 import { resetDB } from "../../db";
+import { UUID } from "../../types/UUID";
 
 const request = supertest(getApp())
 
@@ -69,5 +70,31 @@ describe('Get users', () => {
             email: 'something2@somewhere.com'
           }]))
       }))
+  })
+})
+
+describe('Fetch users', () => {
+  beforeEach(resetDB)
+  afterAll(resetDB)
+
+  let user: UUID
+  beforeEach(async () => {
+    user = await request.post('/users')
+      .send({name: 'name1', email: 'something1@somewhere.com'})
+      .then(({body: {data: {id}}}) => id)
+  })
+  it('should fetch user', async () => {
+    await request.get(`/users/${user}`)
+      .expect(200, {
+        data: {
+          id: user,
+          name: 'name1',
+          email: 'something1@somewhere.com'
+        }
+      })
+  })
+
+  it('should return 404 for unknown user', async () => {
+    await request.get('/users/404user').expect(404)
   })
 })

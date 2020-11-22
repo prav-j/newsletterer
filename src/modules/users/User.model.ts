@@ -34,4 +34,8 @@ export default class User extends Model<User> {
 
   @BelongsToMany(() => Subreddit, () => UserSubreddit)
   subreddits: Subreddit[]
+
+  format() {
+    return {id: this.id, name: this.name, email: this.email};
+  }
 }
