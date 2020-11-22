@@ -1,5 +1,8 @@
-import { BeforeCreate, Column, DataType, Model, PrimaryKey, Table, Unique } from "sequelize-typescript";
+import { BeforeCreate, BelongsToMany, Column, DataType, Model, PrimaryKey, Table, Unique } from "sequelize-typescript";
 import { v4 } from 'uuid'
+import { UUID } from "../../types/UUID";
+import Subreddit from "../subreddit/Subreddit.model";
+import UserSubreddit from "./UserSubreddit.model";
 
 @Table({
   tableName: "users",
@@ -8,7 +11,7 @@ import { v4 } from 'uuid'
 export default class User extends Model<User> {
   @PrimaryKey
   @Column({type: DataType.UUID})
-  id: ReturnType<typeof v4>;
+  id: UUID;
 
   @Unique({name: 'user.name', msg: 'User name has to be unique'})
   @Column({
@@ -28,4 +31,7 @@ export default class User extends Model<User> {
   static generateUUID(user: User) {
     user.id = v4()
   }
+
+  @BelongsToMany(() => Subreddit, () => UserSubreddit)
+  subreddits: Subreddit[]
 }
