@@ -22,10 +22,28 @@ export const getUsers = async (handler: RequestHandler) => {
 
 export const fetchUser = async (handler: RequestHandler) => {
   const userId = handler.getRouteParameters().userId
-  let user = await service.fetchUser(userId);
+  const user = await service.fetchUser(userId);
   if (user) {
     handler.sendResponse(user.format())
   } else {
     handler.sendNotFoundResponse()
+  }
+}
+
+export const updateUser = async (handler: RequestHandler) => {
+  const userId = handler.getRouteParameters().userId
+  try {
+    const user = await service.updateUser(userId, handler.getBody());
+    if (!user) {
+      handler.sendNotFoundResponse()
+      return
+    }
+    handler.sendResponse(user.format())
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      handler.sendValidationError(error.errors[0])
+    } else {
+      handler.sendServerError(error)
+    }
   }
 }

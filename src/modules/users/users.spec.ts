@@ -98,3 +98,44 @@ describe('Fetch users', () => {
     await request.get('/users/404user').expect(404)
   })
 })
+
+describe('Update user', () => {
+  beforeEach(resetDB)
+  afterAll(resetDB)
+
+  let user1: UUID
+  beforeEach(async () => {
+    user1 = await request.post('/users')
+      .send({name: 'name1', email: 'something1@somewhere.com'})
+      .then(({body: {data: {id}}}) => id)
+    await request.post('/users')
+      .send({name: 'name2', email: 'something2@somewhere.com'})
+      .then(({body: {data: {id}}}) => id)
+  })
+
+  it('should allow user to change their name and email', async () => {
+    await request.put(`/users/${user1}`)
+      .send({name: 'name1new', email: 'something1new@somewhere.com'})
+      .expect(200)
+    await request.get(`/users/${user1}`)
+      .expect(200, {
+        data: {
+          id: user1,
+          name: 'name1new',
+          email: 'something1new@somewhere.com'
+        }
+      })
+  })
+
+  it('should not allow name to collide with another user', async () => {
+    await request.put(`/users/${user1}`)
+      .send({name: 'name2'})
+      .expect(400)
+  })
+
+  it('should not allow email to collide with another user', async () => {
+    await request.put(`/users/${user1}`)
+      .send({email: 'something2@somewhere.com'})
+      .expect(400)
+  })
+})
