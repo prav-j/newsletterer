@@ -1,5 +1,5 @@
 import {
-  BeforeCreate,
+  BeforeSave,
   BelongsTo,
   Column,
   DataType,
@@ -10,8 +10,7 @@ import {
   Table
 } from "sequelize-typescript";
 import User from "../users/User.model";
-import { Transaction } from "sequelize";
-import { DateTime } from "luxon";
+import { computeNextNewsletterTime } from "./service";
 
 @Table({
   tableName: 'newsletter_schedules',
@@ -42,28 +41,14 @@ export default class NewsletterSchedule extends Model<NewsletterSchedule> {
   @BelongsTo(() => User)
   user: User
 
-  @BeforeCreate
+  @BeforeSave
   static async scheduleNext(schedule: NewsletterSchedule) {
     if (!schedule.isEnabled) {
+      schedule.nextScheduledAt = undefined
       return
     }
     schedule.nextScheduledAt = computeNextNewsletterTime(schedule.newsletterSendTime, schedule.timezone)
     return schedule
-  }
-
-  async markSentAndScheduleNext(transaction?: Transaction) {
-    if (!this.isEnabled) {
-      return
-    }
-    await this.update({
-      nextScheduledAt: computeNextNewsletterTime(this.newsletterSendTime, this.timezone)
-    }, {transaction})
-  }
-
-  async cancelScheduled(transaction?: Transaction) {
-    await this.update({
-      nextScheduledAt: null
-    }, {transaction})
   }
 
   format() {
@@ -74,13 +59,4 @@ export default class NewsletterSchedule extends Model<NewsletterSchedule> {
       timezone: this.timezone
     }
   }
-}
-
-const computeNextNewsletterTime = (newsletterSendTime: string, timezone: string) => {
-  const nextTimestampISO = `${DateTime.local().setZone(timezone).toFormat("yyyy-MM-dd")}T${newsletterSendTime}`
-  const nextTime = DateTime.fromISO(nextTimestampISO, {zone: timezone})
-  if (nextTime.diffNow().milliseconds < 0) {
-    return nextTime.plus({hours: 24}).toSeconds()
-  }
-  return nextTime.toSeconds()
 }

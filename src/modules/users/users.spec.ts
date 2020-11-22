@@ -195,11 +195,13 @@ describe('Update user', () => {
     await request.put(`/users/${user1}`)
       .send({name: 'name1new', email: 'something1new@somewhere.com'})
       .expect(200)
-      .then(response => expect(response.body.data).toMatchObject({
-        id: user1,
-        name: 'name1new',
-        email: 'something1new@somewhere.com'
-      }))
+      .then(response => {
+        expect(response.body.data).toMatchObject({
+          id: user1,
+          name: 'name1new',
+          email: 'something1new@somewhere.com'
+        });
+      })
   })
 
   it('should allow user to toggle the newsletter sendout', async () => {
@@ -209,18 +211,26 @@ describe('Update user', () => {
       })
       .expect(200)
       .then(response => {
-        expect(response.body.data.schedule.isEnabled).toEqual(false)
+        const schedule = response.body.data.schedule
+        expect(schedule.isEnabled).toEqual(false)
+        expect(schedule.nextScheduledAt).toEqual(null)
       })
   })
 
   it('should allow user to change the newsletter sendout time', async () => {
+    const timezone = 'UTC'
+    const now = DateTime.local().setZone(timezone)
+    const nextTimestampISO = `${now.plus({hours: now.hour < 10 ? 0 : 24}).toFormat("yyyy-MM-dd")}T10:00:00`
+    const nextTime = DateTime.fromISO(nextTimestampISO, {zone: timezone})
     await request.put(`/users/${user1}`)
       .send({
         schedule: {newsletterSendTime: "10:00:00"}
       })
       .expect(200)
       .then(response => {
-        expect(response.body.data.schedule.newsletterSendTime).toEqual("10:00:00")
+        const schedule = response.body.data.schedule
+        expect(schedule.newsletterSendTime).toEqual("10:00:00")
+        expect(schedule.nextScheduledAt).toEqual(Math.round(nextTime.toSeconds()))
       })
   })
 

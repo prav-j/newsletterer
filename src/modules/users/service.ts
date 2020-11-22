@@ -4,15 +4,12 @@ import { UUID } from "../../types/UUID";
 import { Op, Transaction } from "sequelize";
 import NewsletterSchedule from "../newsletter/NewsletterSchedule.model";
 import { DateTime } from "luxon";
+import { cancelSchedule, NewsletterScheduleRequest, updateNewsletterSchedule } from "../newsletter/service";
 
 interface CreateOrUpdateUserRequest {
   name: string
   email: string
-  schedule: {
-    isEnabled: boolean | undefined,
-    newsletterSendTime: string | undefined,
-    timezone: string | undefined
-  }
+  schedule: NewsletterScheduleRequest
 }
 
 export async function getUsers() {
@@ -46,7 +43,7 @@ export const createUser = async (request: CreateOrUpdateUserRequest) => {
       ...extractScheduleData(request)
     }, {transaction})
     if (request.schedule?.isEnabled === false) {
-      await newsletterSchedule.cancelScheduled(transaction)
+      await cancelSchedule(user)
     }
     user.$set('newsletterSchedule', newsletterSchedule)
     return user
@@ -55,12 +52,12 @@ export const createUser = async (request: CreateOrUpdateUserRequest) => {
 
 export const updateUser = async (userId: string, request: CreateOrUpdateUserRequest) => {
   return withTransaction(async transaction => {
-    const user = await fetchUser(userId, transaction)
+    const user = await User.findOne({where: {id: userId}, include: [NewsletterSchedule], transaction})
     if (!user) {
       return null
     }
     await user.update(extractUserData(request), {transaction});
-    await (await user.$get('newsletterSchedule'))?.update(extractScheduleData(request), {transaction})
+    await updateNewsletterSchedule(request.schedule, user.newsletterSchedule, transaction)
     return user
   });
 };
