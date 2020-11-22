@@ -14,4 +14,11 @@ export default class Subreddit extends Model<Subreddit> {
 
   @BelongsToMany(() => User, () => UserSubreddit)
   users: User[]
+
+  async formatWithUserCount() {
+    return {
+      name: this.name,
+      userCount: await this.$count('users')
+    }
+  }
 }
