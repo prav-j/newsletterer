@@ -88,7 +88,7 @@ describe('Create user', () => {
   it('should schedule a newsletter on user creation', async () => {
     const timezone = 'Europe/Berlin'
     const now = DateTime.local().setZone(timezone)
-    const nextTimestampISO = `${DateTime.local().plus({hours: now.hour < 10 ? 0 : 24}).toFormat("yyyy-MM-dd")}T10:00:00`
+    const nextTimestampISO = `${now.plus({hours: now.hour < 10 ? 0 : 24}).toFormat("yyyy-MM-dd")}T10:00:00`
     const nextTime = DateTime.fromISO(nextTimestampISO, {zone: timezone})
     await request.post('/users')
       .send({
@@ -103,7 +103,7 @@ describe('Create user', () => {
         expect(response.body.data).toEqual(expect.objectContaining({
           schedule: expect.objectContaining({
             isEnabled: true,
-            nextScheduledAt: nextTime.toSeconds()
+            nextScheduledAt: nextTime.toISO()
           })
         }))
       })
@@ -159,7 +159,7 @@ describe('Fetch users', () => {
           email: 'something1@somewhere.com',
           schedule: expect.objectContaining({
             isEnabled: true,
-            nextScheduledAt: expect.any(Number),
+            nextScheduledAt: expect.any(String),
             newsletterSendTime: '08:00:00',
             timezone: 'UTC'
           })
@@ -230,7 +230,7 @@ describe('Update user', () => {
       .then(response => {
         const schedule = response.body.data.schedule
         expect(schedule.newsletterSendTime).toEqual("10:00:00")
-        expect(schedule.nextScheduledAt).toEqual(Math.round(nextTime.toSeconds()))
+        expect(schedule.nextScheduledAt).toEqual(nextTime.toISO())
       })
   })
 

@@ -11,6 +11,7 @@ import {
 } from "sequelize-typescript";
 import User from "../users/User.model";
 import { computeNextNewsletterTime } from "./service";
+import { DateTime } from "luxon";
 
 @Table({
   tableName: 'newsletter_schedules',
@@ -54,7 +55,9 @@ export default class NewsletterSchedule extends Model<NewsletterSchedule> {
   format() {
     return {
       isEnabled: this.isEnabled,
-      nextScheduledAt: this.nextScheduledAt,
+      nextScheduledAt: this.nextScheduledAt ? DateTime.fromMillis(this.nextScheduledAt * 1000)
+        .setZone(this.timezone)
+        .toISO() : null,
       newsletterSendTime: this.newsletterSendTime,
       timezone: this.timezone
     }
