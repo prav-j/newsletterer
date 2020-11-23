@@ -6,12 +6,15 @@ import * as emailAPI from "../../api/emailService"
 import NewsletterSchedule from "./NewsletterSchedule.model";
 import { Transaction } from "sequelize";
 import { DateTime } from "luxon";
+import cache from "../../utils/cache";
 
 const createNewsletterForUser = async (user: User) => {
   if (user.subreddits.length === 0) {
     return null
   }
-  const states = await Promise.all(user.subreddits.map(subreddit => getTopPostsInLastDay(subreddit)))
+  const states = await Promise.all(
+    user.subreddits
+      .map(subreddit => cache(`fetchPosts:subreddit:${subreddit.name}`, () => getTopPostsInLastDay(subreddit))))
   return {
     user: user.name,
     email: user.email,
